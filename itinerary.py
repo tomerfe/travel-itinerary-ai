@@ -1,6 +1,8 @@
 import os
 import json
 import re
+import requests
+from io import BytesIO
 from typing import List, Dict, Any, Union
 from dotenv import load_dotenv  # type: ignore
 import cohere
@@ -25,6 +27,27 @@ def truncate_to_last_complete_json_object(json_str: str) -> str:
     if last_bracket != -1:
         return json_str[:last_bracket+1]
     return json_str
+
+def generate_trip_summary_image(user_input):
+    """Generate a trip summary image using Hugging Face Stable Diffusion."""
+    HF_TOKEN = os.getenv("HUGGINGFACE_API_KEY")
+    API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1"
+    headers = {"Authorization": f"Bearer {HF_TOKEN}", "Content-Type": "application/json"}
+    
+    prompt = (
+        f"A vibrant, photorealistic image of {user_input['people']} "
+        f"enjoying {user_input['interests']} in {user_input['destination']} "
+        f"during {user_input['season_or_dates']}. Highly detailed, realistic, 8k."
+    )
+    payload = {"inputs": prompt}
+    try:
+        resp = requests.post(API_URL, headers=headers, data=json.dumps(payload), timeout=60)
+        resp.raise_for_status()
+        img_bytes = resp.content
+        return BytesIO(img_bytes)  # Streamlit can display BytesIO directly
+    except Exception as e:
+        print("Hugging Face error:", e)
+        return "https://via.placeholder.com/1024x768?text=Trip+Image+Unavailable"
 
 def generate_itineraries(user_input: dict) -> Union[Dict, Dict[str, str]]:
     """

@@ -1,6 +1,7 @@
 import streamlit as st
-from itinerary import generate_itineraries
+from itinerary import generate_itineraries, generate_trip_summary_image
 from image_fetcher import fetch_image
+import io
 
 st.set_page_config(page_title="TripTactix: AI Trip Planner", layout="centered")
 st.title("TripTactix")
@@ -26,17 +27,27 @@ if submitted:
         "interests": interests,
     }
     st.info("Generating personalized itinerary...")
+    
+    # Disable Replicate image generation (insufficient credits)
+    # with st.spinner("Creating your trip summary image with Replicate..."):
+    #     trip_image = generate_trip_summary_image(user_input)
+    
+    # Generate itinerary
     itineraries = generate_itineraries(user_input)
+    
     st.write("\n---\n")
     st.header("Your Itinerary")
-    # Always show the raw backend response for debugging
-    st.subheader("Debug: Raw Backend Response")
-    st.code(str(itineraries), language="json")
+    
+    # Disable trip summary image display
+    # st.subheader("🖼️ Your Trip Visualization")
+    # if isinstance(trip_image, io.BytesIO):
+    #     st.image(trip_image, caption=f"AI-generated visualization of your trip to {destination}", use_container_width=True)
+    # else:
+    #     # Fallback URL or direct image URL from Replicate
+    #     st.image(trip_image, caption=f"Your trip to {destination}", use_container_width=True)
+    
     if isinstance(itineraries, dict) and 'error' in itineraries:
-        st.error(itineraries['error'])
-        if 'raw_output' in itineraries:
-            st.subheader("Raw AI Output")
-            st.code(itineraries['raw_output'], language="json")
+        st.error("Sorry, there was an issue generating your itinerary. Please try again.")
     elif isinstance(itineraries, dict) and 'title' in itineraries and 'days' in itineraries:
         st.subheader(itineraries.get("title", "Itinerary"))
         for day in itineraries.get("days", []):
@@ -61,7 +72,7 @@ if submitted:
                     st.markdown(f"- {activity}")
             st.write(day.get("description", ""))
     else:
-        st.warning("No valid itinerary generated. Please check your API key, try again, or see the debug output above.")
+        st.warning("No valid itinerary generated. Please try again.")
 else:
     st.write("\n---\n")
     st.header("Your Itinerary")

@@ -1,4 +1,6 @@
 streamlit
 openai
 requests
-python-dotenv 
+python-dotenv
+cohere
+replicate

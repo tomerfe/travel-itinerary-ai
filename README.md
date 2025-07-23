@@ -1,11 +1,59 @@
 # TripTactix 🧳✈️
 
-An AI-powered personal trip planner that generates personalized travel itineraries with real images.
+**Your personal trip organizer!** Just tell him where, when, and who is traveling, and you'll get the perfect itinerary, with everything you need to read, see and know for the perfect trip.
+
+## Problem/Opportunity
+
+Planning a multi-day trip is time-consuming: travellers (including us) juggle countless blogs, maps, and social networks to build an agenda that fits ages, interests, and season. An AI that aggregates that research and turns simple preferences into ready-to-use daily plans (illustrated with real photos) saves tons of planning time and provide inspiration for the traveler.
+
+## Core Flow (MVP)
+
+### User Input
+The user provides essential information:
+- **Destination**
+- **Number of travel days**
+- **Dates or season**
+- **Who's going** (number of people, ages, relationship)
+- **Interests**
+
+### AI Processing
+1. **Generate** 2–3 unique itineraries using an LLM, customized based on user input
+2. **Retrieve** relevant real-world photos for each activity or location
+3. **Display** itineraries in an interactive Streamlit UI with:
+   - Daily breakdowns
+   - Activity descriptions
+   - Photos
+   - Save/share option
+4. **Optionally** collect user feedback and regenerate with updates
+
+## AI Pipeline
+
+```
+[API 1: Cohere]
+    ➔ Generates trip itinerary (JSON-formatted)
+    ↓
+Structured Itinerary Data
+    ↓
+[API 2: Pexels Image Search API]
+    ➔ Fetches relevant real-world images for each activity/location
+    ↓
+Itineraries with Activity Images
+    ↓
+[API 3: Hugging Face Inference API (Stable Diffusion)]
+    ➔ Generates a custom summary image of the trip (based on destination, participants, and season)
+    ↓
+Final Enhanced Itinerary with AI-generated Trip Summary Image
+    ↓
+Streamlit UI
+    ➔ Displays the generated summary image prominently at the top
+    ➔ Renders detailed daily itineraries, each activity enriched with real images
+```
 
 ## Features
 
 - 🤖 **AI-Powered Itineraries**: Uses Cohere's Command R+ model to generate personalized travel plans
 - 🖼️ **Real Images**: Fetches relevant images from Pexels for each activity
+- 🎨 **Custom Trip Visualization**: AI-generated summary images using Stable Diffusion
 - 📱 **Beautiful UI**: Clean Streamlit interface with responsive design
 - 🎯 **Personalized**: Considers destination, travel dates, group info, and interests
 - 📸 **Photo Attribution**: Properly credits photographers with links to their profiles
@@ -32,6 +80,7 @@ cp env.example .env
 # Edit .env with your actual API keys
 COHERE_API_KEY=your_cohere_api_key_here
 PEXELS_API_KEY=your_pexels_api_key_here
+HUGGINGFACE_API_KEY=your_huggingface_api_key_here
 ```
 
 ### 4. Get API Keys
@@ -46,25 +95,17 @@ PEXELS_API_KEY=your_pexels_api_key_here
 2. Sign up for a free account
 3. Get your API key
 
+#### Hugging Face API Key
+1. Go to [https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
+2. Sign up for a free account
+3. Create a new token with "Read" access
+
 ### 5. Run the App
 ```bash
 streamlit run app.py
 ```
 
 The app will open in your browser at `http://localhost:8501`
-
-## Usage
-
-1. **Enter Trip Details**:
-   - Destination (e.g., "Paris", "Tokyo")
-   - Number of travel days (1-30)
-   - Season or travel dates
-   - Group information (ages, relationships)
-   - Interests (e.g., "art, food, hiking, museums")
-
-2. **Generate Itinerary**: Click "Generate Itineraries" to create your personalized travel plan
-
-3. **View Results**: See your itinerary with daily activities, descriptions, and relevant images
 
 ## Project Structure
 
@@ -79,34 +120,15 @@ travel-itinerary-ai/
 └── README.md           # This file
 ```
 
-## Features in Detail
-
-### AI Itinerary Generation
-- Uses Cohere's Command R+ model for natural language generation
-- Generates structured JSON responses with daily activities
-- Includes error handling and fallback responses
-- Supports 1-30 day itineraries
-
-### Image Integration
-- Fetches relevant images from Pexels for each activity
-- Proper photographer attribution with profile links
-- Fallback images if API fails
-- Optimized for landscape orientation
-
-### User Interface
-- Clean, responsive Streamlit interface
-- Form validation and error handling
-- Debug mode for troubleshooting
-- Mobile-friendly design
-
 ## API Usage
 
-The app uses two main APIs:
+The app uses three main APIs:
 
 1. **Cohere API**: For generating travel itineraries
 2. **Pexels API**: For fetching relevant images
+3. **Hugging Face API**: For generating custom trip summary images
 
-Both APIs offer free tiers suitable for personal use and development.
+All APIs offer free tiers suitable for personal use and development.
 
 ## Contributing
 
@@ -125,14 +147,4 @@ This project is open source and available under the [MIT License](LICENSE).
 If you encounter any issues:
 1. Check that your API keys are correctly set in the `.env` file
 2. Ensure all dependencies are installed
-3. Check the debug output in the app for error messages
-4. Open an issue on GitHub with details about the problem
-
-## Roadmap
-
-- [ ] Add support for multiple itinerary options
-- [ ] Integrate with more image APIs
-- [ ] Add weather information
-- [ ] Include restaurant recommendations
-- [ ] Add export functionality (PDF, calendar)
-- [ ] Mobile app version 
+3. Open an issue on GitHub with details about the problem 
