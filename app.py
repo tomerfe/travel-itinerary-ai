@@ -28,26 +28,39 @@ if submitted:
     }
     st.info("Generating personalized itinerary...")
     
-    # Disable Replicate image generation (insufficient credits)
-    # with st.spinner("Creating your trip summary image with Replicate..."):
-    #     trip_image = generate_trip_summary_image(user_input)
+    # Generate trip summary image with Hugging Face
+    try:
+        with st.spinner("Creating your trip summary image..."):
+            trip_image = generate_trip_summary_image(user_input)
+    except Exception as e:
+        st.warning(f"Image generation failed: {str(e)}")
+        trip_image = "https://via.placeholder.com/1024x768?text=Image+Generation+Failed"
     
     # Generate itinerary
-    itineraries = generate_itineraries(user_input)
+    try:
+        itineraries = generate_itineraries(user_input)
+    except Exception as e:
+        st.error(f"Itinerary generation failed: {str(e)}")
+        itineraries = {"error": f"Exception during generation: {str(e)}"}
     
     st.write("\n---\n")
     st.header("Your Itinerary")
     
-    # Disable trip summary image display
-    # st.subheader("🖼️ Your Trip Visualization")
-    # if isinstance(trip_image, io.BytesIO):
-    #     st.image(trip_image, caption=f"AI-generated visualization of your trip to {destination}", use_container_width=True)
-    # else:
-    #     # Fallback URL or direct image URL from Replicate
-    #     st.image(trip_image, caption=f"Your trip to {destination}", use_container_width=True)
+    # Display trip summary image
+    st.subheader("🖼️ Your Trip Visualization")
+    if isinstance(trip_image, io.BytesIO):
+        st.image(trip_image, caption=f"AI-generated visualization of your trip to {destination}", use_container_width=True)
+    else:
+        # Fallback URL if image generation failed
+        st.image(trip_image, caption=f"Your trip to {destination}", use_container_width=True)
     
     if isinstance(itineraries, dict) and 'error' in itineraries:
         st.error("Sorry, there was an issue generating your itinerary. Please try again.")
+        # Show debug information
+        with st.expander("Debug Information (click to expand)"):
+            st.write("Error details:", itineraries.get('error', 'Unknown error'))
+            if 'raw_output' in itineraries:
+                st.write("Raw output:", itineraries['raw_output'])
     elif isinstance(itineraries, dict) and 'title' in itineraries and 'days' in itineraries:
         st.subheader(itineraries.get("title", "Itinerary"))
         for day in itineraries.get("days", []):
